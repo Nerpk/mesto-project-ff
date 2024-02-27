@@ -1,5 +1,3 @@
-const popups = document.querySelectorAll('.popup');
-
 function openPopup(popup) {
     popup.classList.add('popup_is-opened');
     document.addEventListener('keydown', escapeCheck);
@@ -8,18 +6,19 @@ function openPopup(popup) {
 function closePopup(popup) {
     popup.classList.remove('popup_is-opened');
     document.removeEventListener('keydown', escapeCheck);
-    console.log('hero')
 }
 
-function escapeCheck(key) {
-    if (key.keyCode === 27) {
-        key.preventDefault();
-        popups.forEach(function (item) {
-            if (item.classList.contains('popup_is-opened')) {
-                closePopup(item);
-            }
-        })
+function escapeCheck(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closePopup(document.querySelector('.popup_is-opened'));
     }
 }
 
-export {popups, openPopup, closePopup}
+const closePopupByOverlay = evt => {
+    if (evt.target === evt.currentTarget) { 
+        closePopup(evt.currentTarget) 
+    } 
+}
+
+export {openPopup, closePopup, closePopupByOverlay}
