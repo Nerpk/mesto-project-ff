@@ -2,8 +2,18 @@ import '../pages/index.css';
 import { initialCards } from './cards';
 import { openPopup, closePopup, closePopupByOverlay } from './modal';
 import { createCard, removeCard, likingCard } from './card'
+import { enableValidation, clearValidation } from './validation';
 
 
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button__disabled',
+    inputErrorClass: 'form__input_type_error',
+    errorClass: 'form__input-error_active'
+  }; 
+enableValidation(validationConfig);
 
 const placesList = document.querySelector('.places__list');
 function lookingCloser(evt) {
@@ -34,11 +44,11 @@ edit.addEventListener('click', () => {
     openPopup(editPopup);
     editForm.elements.name.value = formName.textContent;
     editForm.elements.description.value = formJob.textContent;
+    clearValidation(editForm, validationConfig);
 })
 editPopupClose.addEventListener('click', () => {
     closePopup(editPopup)
 })
-//editPopup.addEventListener('click', closePopupByOverlay)
 
 
 function handleEditFormSubmit(evt) {
@@ -56,18 +66,20 @@ const addPopup = document.querySelector('.popup_type_new-card')
 const addPopupClose = addPopup.querySelector('.popup__close')
 const addForm = addPopup.querySelector('.popup__form')
 add.addEventListener('click', () => {
-    openPopup(addPopup)
+    openPopup(addPopup);
+    addForm.elements.place.value = "";
+    addForm.elements.link.value = "";
+    clearValidation(addForm, validationConfig);
 })
 addPopupClose.addEventListener('click', () => {
     closePopup(addPopup)
 })
-//addPopup.addEventListener('click', closePopupByOverlay)
 
 
 function addCardFromPopup(evt) {
     evt.preventDefault();
     placesList.prepend(createCard(
-        {name: addForm.elements.place_name.value, 
+        {name: addForm.elements.place.value, 
          link: addForm.elements.link.value},
          removeCard, likingCard, lookingCloser)
     )
@@ -85,4 +97,4 @@ let popupCaption = imagePopup.querySelector('.popup__caption')
 imagePopupClose.addEventListener('click', () => {
     closePopup(imagePopup)
 })
-//imagePopup.addEventListener('click', closePopupByOverlay)
+
