@@ -21,4 +21,13 @@ const closePopupByOverlay = evt => {
     } 
 }
 
-export {openPopup, closePopup, closePopupByOverlay}
+function loading(isLoad, button) {
+    if (isLoad) {
+        button.textContent = "Сохранение..."
+    }
+    else {
+        button.textContent = "Сохранить"
+    }
+}
+
+export {openPopup, closePopup, closePopupByOverlay, loading}

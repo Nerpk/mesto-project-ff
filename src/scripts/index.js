@@ -1,10 +1,10 @@
 import '../pages/index.css';
-import { initialCards } from './cards';
-import { openPopup, closePopup, closePopupByOverlay } from './modal';
-import { createCard, removeCard, likingCard } from './card'
+import { openPopup, closePopup, closePopupByOverlay, loading } from './modal';
+import { createCard, removeCard, likingCard } from './card';
 import { enableValidation, clearValidation } from './validation';
+import { getUser, getCards, pushUser, pushCard, changeAvatar } from './api';
 
-
+//валидация
 const validationConfig = {
     formSelector: '.popup__form',
     inputSelector: '.popup__input',
@@ -22,7 +22,19 @@ function lookingCloser(evt) {
     popupImage.alt = evt.target.alt;
     popupCaption.textContent = evt.target.alt;
 }
-initialCards.forEach(item => placesList.append(createCard(item, removeCard, likingCard, lookingCloser)));
+
+
+
+Promise.all([getUser(), getCards()])
+.then(([me, cards]) => {
+    document.querySelector('.profile__title').textContent = me.name;
+    document.querySelector('.profile__description').textContent = me.about;
+    document.querySelector('.profile__image').style.backgroundImage = `url(${me.avatar})`;
+
+    cards.forEach(card => {
+        placesList.append(createCard(card, removeCard, likingCard, lookingCloser, me._id))
+    })
+})
 
 
 
@@ -53,8 +65,10 @@ editPopupClose.addEventListener('click', () => {
 
 function handleEditFormSubmit(evt) {
     evt.preventDefault();
+    loading(true, editForm.querySelector('.popup__button'))
     formName.textContent = editForm.elements.name.value;
     formJob.textContent = editForm.elements.description.value;
+    pushUser(editForm).finally(() => {loading(false, editForm.querySelector('.popup__button'))})
     closePopup(editPopup);
 }
 editForm.addEventListener('submit', handleEditFormSubmit)
@@ -78,11 +92,9 @@ addPopupClose.addEventListener('click', () => {
 
 function addCardFromPopup(evt) {
     evt.preventDefault();
-    placesList.prepend(createCard(
-        {name: addForm.elements.place.value, 
-         link: addForm.elements.link.value},
-         removeCard, likingCard, lookingCloser)
-    )
+    loading(true, addForm.querySelector('.popup__button'))
+    pushCard(addForm).then(card => {placesList.prepend(createCard(card, removeCard, likingCard, lookingCloser, card.owner._id))})
+        .finally(() => loading(false, addForm.querySelector('.popup__button')))
     closePopup(addPopup);
     addForm.reset();
 }
@@ -97,4 +109,29 @@ let popupCaption = imagePopup.querySelector('.popup__caption')
 imagePopupClose.addEventListener('click', () => {
     closePopup(imagePopup)
 })
+
+
+
+const avatar = document.querySelector('.profile__image')
+const avatarPopup = document.querySelector('.popup_type_avatar')
+const avatarPopupClose = avatarPopup.querySelector('.popup__close')
+const avatarForm = avatarPopup.querySelector('.popup__form')
+avatar.addEventListener('click', () => {
+    openPopup(avatarPopup);
+    avatarForm.elements.ava.value = avatar.style.backgroundImage.slice(4, -1).replace(/["']/g, "");
+    clearValidation(avatarForm, validationConfig);
+
+})
+avatarPopupClose.addEventListener('click', () => {
+    closePopup(avatarPopup)
+})
+
+function changeAvatarFromPopup(evt) {
+    evt.preventDefault();
+    loading(true, avatarForm.querySelector('.popup__button'))
+    avatar.style.backgroundImage = `url(${avatarForm.elements.ava.value})`;
+    changeAvatar(avatarForm).finally(() => loading(false, avatarForm.querySelector('.popup__button')))
+    closePopup(avatarPopup);
+}
+avatarForm.addEventListener('submit', changeAvatarFromPopup)
 
