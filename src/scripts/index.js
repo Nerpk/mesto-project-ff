@@ -35,6 +35,7 @@ Promise.all([getUser(), getCards()])
         placesList.append(createCard(card, removeCard, likingCard, lookingCloser, me._id))
     })
 })
+.catch(err => {console.log(err)})
 
 
 
@@ -68,8 +69,11 @@ function handleEditFormSubmit(evt) {
     loading(true, editForm.querySelector('.popup__button'))
     formName.textContent = editForm.elements.name.value;
     formJob.textContent = editForm.elements.description.value;
-    pushUser(editForm).finally(() => {loading(false, editForm.querySelector('.popup__button'))})
-    closePopup(editPopup);
+    pushUser(editForm)
+        .then(() => closePopup(editPopup))
+        .catch(err => {console.log(err)})
+        .finally(() => {loading(false, editForm.querySelector('.popup__button'))})
+    
 }
 editForm.addEventListener('submit', handleEditFormSubmit)
 
@@ -93,10 +97,15 @@ addPopupClose.addEventListener('click', () => {
 function addCardFromPopup(evt) {
     evt.preventDefault();
     loading(true, addForm.querySelector('.popup__button'))
-    pushCard(addForm).then(card => {placesList.prepend(createCard(card, removeCard, likingCard, lookingCloser, card.owner._id))})
+    pushCard(addForm)
+        .then(card => {
+            placesList.prepend(createCard(card, removeCard, likingCard, lookingCloser, card.owner._id))
+            closePopup(addPopup);
+            addForm.reset();
+        })
+        .catch(err => {console.log(err)})
         .finally(() => loading(false, addForm.querySelector('.popup__button')))
-    closePopup(addPopup);
-    addForm.reset();
+    
 }
 addForm.addEventListener('submit', addCardFromPopup)
 
@@ -130,8 +139,10 @@ function changeAvatarFromPopup(evt) {
     evt.preventDefault();
     loading(true, avatarForm.querySelector('.popup__button'))
     avatar.style.backgroundImage = `url(${avatarForm.elements.ava.value})`;
-    changeAvatar(avatarForm).finally(() => loading(false, avatarForm.querySelector('.popup__button')))
-    closePopup(avatarPopup);
+    changeAvatar(avatarForm)
+        .then(() => closePopup(avatarPopup))
+        .catch(err => {console.log(err)})
+        .finally(() => loading(false, avatarForm.querySelector('.popup__button')))
 }
 avatarForm.addEventListener('submit', changeAvatarFromPopup)
 

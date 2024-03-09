@@ -14,7 +14,8 @@ function createCard(cardInfo, funcRemove, funcLike, funcClick, idUser) {
     const deleteButton = cardElement.querySelector('.card__delete-button'); 
     deleteButton.addEventListener('click', function () {
       deleteCard(cardInfo._id)
-      funcRemove(deleteButton);
+      .then(funcRemove(deleteButton))
+      .catch(err => console.log(err))
   });
   } 
   else {
@@ -22,21 +23,27 @@ function createCard(cardInfo, funcRemove, funcLike, funcClick, idUser) {
   }
   
   //работа с лайком
-  if (cardInfo.likes.some(item => {return item._id === idUser})) {//проверка лайкнутость карточки поступающей с сервера
+  if (cardInfo.likes.some(item => {return item._id === idUser})) {//проверка на лайкнутость карточки поступающей с сервера
     cardElement.querySelector('.card__like-button').classList.add('card__like-button_is-active')
   }
   cardElement.querySelector('.card__like-counter').textContent = cardInfo.likes.length;
   cardElement.addEventListener('click', evt => {//отправка и удаление 
-    funcLike(evt);
-
     if (evt.target.classList.contains('card__like-button')) {
-      if (evt.target.classList.contains('card__like-button_is-active')) {
+      if (!evt.target.classList.contains('card__like-button_is-active')) {
         putLike(cardInfo._id)
-        .then(card => {cardElement.querySelector('.card__like-counter').textContent = card.likes.length;})
+        .then(card => {
+          funcLike(evt);
+          cardElement.querySelector('.card__like-counter').textContent = card.likes.length;
+        })
+        .catch(err => {console.log(err)})
       }
       else {
         deleteLike(cardInfo._id)
-        .then(card => {cardElement.querySelector('.card__like-counter').textContent = card.likes.length;})
+        .then(card => {
+          funcLike(evt);
+          cardElement.querySelector('.card__like-counter').textContent = card.likes.length;
+        })
+        .catch(err => {console.log(err)})
       }
     }
   })
